@@ -70,8 +70,11 @@ if __name__ == "__main__":
                 print(f"Description: {description(soup)}")
                     
                 sleep_time = random.randint(1, 5)
-                if title(soup).__contains__("Blurry:") or title(soup).__contains__("Vertical:"):
+                if title(soup).__contains__("Blurry:") or title(soup).__contains__("Vertical:") or title(soup).__contains__("EM ") or title(soup).__contains__("WT ") or title(soup).__contains__("1080x1920"):
                     print("AD")
+                    #write to file
+                    with open('ads.txt', 'a', encoding='utf-8') as f:
+                        f.write(title(soup) + '\n')
                     sleep_time = 0
                 else:
                     def similar(a, b, threshold=0.8):
@@ -84,7 +87,25 @@ if __name__ == "__main__":
                             print(f"Interest found: {interest}")
                             print(f"Interest found: {interest}")
                             sleep_time += 10
+                            
+                # write to files
+                with open('titles.txt', 'a', encoding='utf-8') as f:
+                    f.write(title(soup) + '\n')
+                with open('descriptions.txt', 'a', encoding='utf-8') as f:
+                    f.write(description(soup) + '\n')
+
+                if any(similar(interest, word) for interest in interest_list 
+                    for word in title(soup).lower().split() + description(soup).lower().split()):
+                    with open('interest-titles.txt', 'a', encoding='utf-8') as f:
+                     f.write(title(soup) + '\n')
+                    with open('interest-descriptions.txt', 'a', encoding='utf-8') as f:
+                     f.write(description(soup) + '\n')
+
+                #sleep
                 time.sleep(sleep_time)
+
+
+                
                 
             
     except KeyboardInterrupt:
