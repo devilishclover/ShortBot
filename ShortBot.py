@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from win32gui import GetForegroundWindow, GetWindowText
 import win32clipboard
 from difflib import SequenceMatcher
+from ollama import chat
 
 def get_chrome_url():
     window = GetForegroundWindow()
@@ -50,8 +51,35 @@ def description(soup):
 
 if __name__ == "__main__":
     interests = pyautogui.prompt('Enter your interests (separated by commas):')
-    interest_list = [x.strip() for x in interests.split(',')]
-    print(f"Interests: {interest_list}")
+    initial_interests = [x.strip() for x in interests.split(',')]
+    interest_list = []
+
+    for interest in initial_interests:
+        prompt = f"""Generate a list of highly related words and direct synonyms based on this interest: {interest}
+
+            Rules:
+            - Return only close variations and direct synonyms
+            - Each word should be on a new line
+            - Include singular/plural forms
+            - Include common compound words
+            - Keep words simple and search-friendly
+            - Start with the most relevant variations
+            
+            Do not include:
+            - Hashtags or symbols
+            - Tangentially related topics
+            - Punctuation or special characters
+            - Generic or unrelated terms
+            - Any explanatory text
+            - numberd lists or bullet points"""
+        response = chat(model='llama3.2', messages=[{'role': 'user', 'content': prompt}])
+        search_queries = response['message']['content'].split('\n')
+        interest_list.extend([query.strip() for query in search_queries if query.strip()])
+        interest_list.append(interest)  # Add the original interest term
+
+    # Remove duplicates while preserving order
+    interest_list = list(dict.fromkeys(interest_list))
+    print(f"Expanded interests: {interest_list}")
 
     print("Auto-scroll started. Press Ctrl+C to stop.")
 
@@ -69,7 +97,7 @@ if __name__ == "__main__":
                 print(f"Title: {title(soup)}")
                 print(f"Description: {description(soup)}")
                     
-                sleep_time = random.randint(1, 5)
+                sleep_time = 1
                 if title(soup).__contains__("Blurry:") or title(soup).__contains__("Vertical:") or title(soup).__contains__("EM ") or title(soup).__contains__("WT ") or title(soup).__contains__("1080x1920"):
                     print("AD")
                     #write to file
@@ -77,16 +105,16 @@ if __name__ == "__main__":
                         f.write(title(soup) + '\n')
                     sleep_time = 0
                 else:
-                    def similar(a, b, threshold=0.8):
-                        return SequenceMatcher(None, a.lower(), b.lower()).ratio() > threshold or \
-                            a.lower() in b.lower() or b.lower() in a.lower()  # Added substring check
+                    def similar(a, b, threshold=0.9):
+                        return SequenceMatcher(None, a.lower(), b.lower()).ratio() > threshold
                     
                     for interest in interest_list:
-                        if any(similar(interest, word) for word in title(soup).lower().split()) or \
-                        any(similar(interest, word) for word in description(soup).lower().split()):
-                            print(f"Interest found: {interest}")
-                            print(f"Interest found: {interest}")
-                            sleep_time += 10
+                        for word in title(soup).lower().split() + description(soup).lower().split():
+                            if similar(interest, word):
+                                print(f"Interest found: {interest}")
+                                print(f"Matching word: {word}")
+                                sleep_time += 10
+                                break
                             
                 # write to files
                 with open('titles.txt', 'a', encoding='utf-8') as f:
