@@ -11,7 +11,6 @@ def get_chrome_url():
     window = GetForegroundWindow()
     title = GetWindowText(window)
     
-    # Chrome window titles usually end with "- Google Chrome"
     if "- Google Chrome" in title:
         # Simulate Ctrl+L to select address bar
         pyautogui.hotkey('ctrl', 'l')
@@ -58,10 +57,8 @@ if __name__ == "__main__":
 
     try:
         while True:
-            # Scroll down one click (-1 means down, 1 would mean up)
             pyautogui.scroll(-1)
             time.sleep(1)
-            # Get URL from active Chrome window
             try:
                 url = get_chrome_url()
             except:
