@@ -36,7 +36,7 @@ To run the script, use the following command:
 python shortbot.py
 ```
 
-Currently you will have to change the like and dislike functions to the correct x and y location. This will be fixed in a later update.
+***Currently you will have to change the like and dislike functions to the correct x and y location. This will be fixed in a later update.***
 
 ## Contact
 
