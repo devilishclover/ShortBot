@@ -68,29 +68,37 @@ if __name__ == "__main__":
     interest_list = []
 
     for interest in initial_interests:
-        prompt = f"""Generate a list of highly related words and direct synonyms based on this interest: {interest}
+        # Run prompt twice for each interest
+        for _ in range(2):
+            prompt = f"""Generate a list of highly related words and direct synonyms based on this interest: {interest}
 
-            Rules:
-            - Return only close variations and direct synonyms
-            - Each word should be on a new line
-            - Include singular/plural forms
-            - Include common compound words
-            - Keep words simple and search-friendly
-            - Start with the most relevant variations
-            
-            Do not include:
-            - Hashtags or symbols
-            - Tangentially related topics
-            - Punctuation or special characters
-            - Generic or unrelated terms
-            - Any explanatory text
-            - numberd lists or bullet points"""
-        response = chat(model='llama3.2', messages=[{'role': 'user', 'content': prompt}])
-        search_queries = response['message']['content'].split('\n')
-        interest_list.extend([query.strip() for query in search_queries if query.strip()])
+                Rules:
+                - Return only close variations and direct synonyms
+                - Each word should be on a new line
+                - Include singular/plural forms
+                - Include common compound words
+                - Keep words simple and search-friendly
+                - Start with the most relevant variations
+                
+                Do not include:
+                - Hashtags or symbols
+                - Tangentially related topics
+                - Punctuation or special characters
+                - Generic or unrelated terms
+                - Any explanatory text
+                - numberd lists or bullet points"""
+            response = chat(model='llama3.2', messages=[{'role': 'user', 'content': prompt}])
+            search_queries = response['message']['content'].split('\n')
+            interest_list.extend([query.strip() for query in search_queries if query.strip()])
         interest_list.append(interest)
-        hashtag_versions = ['#' + query for query in interest_list.copy()]
-        interest_list.extend(hashtag_versions)
+
+    # Remove duplicates while preserving order
+    interest_list = list(dict.fromkeys(interest_list))
+    
+    # Add hashtag versions and remove duplicates again
+    hashtag_versions = ['#' + query if not query.startswith('#') else query for query in interest_list.copy()]
+    interest_list.extend(hashtag_versions) 
+    interest_list = list(dict.fromkeys(interest_list))
 
     # Remove duplicates while preserving order
     interest_list = list(dict.fromkeys(interest_list))
