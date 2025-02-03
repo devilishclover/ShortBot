@@ -4,9 +4,9 @@ ShortBot is a simple Python script designed to tune a youtube shorts algorithm t
 
 ## Features
 
-- brainrot filter
-- likeing and disliking videos
-- rabbit hole prevention
+- Brainrot filter
+- Likes and dislikes videos
+- Rabbit hole prevention
 
 ## Requirements
 
