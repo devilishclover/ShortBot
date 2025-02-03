@@ -9,6 +9,24 @@ from difflib import SequenceMatcher
 from ollama import chat
 import re
 from collections import Counter
+import os
+
+# Ensure necessary text files exist
+file_paths = [
+    'rabbit-hole-block-list.txt',
+    'brainrot.txt',
+    'ads.txt',
+    'titles.txt',
+    'descriptions.txt',
+    'interest-titles.txt',
+    'interest-descriptions.txt',
+    'rabbit-hole.txt'
+]
+
+for file_path in file_paths:
+    if not os.path.exists(file_path):
+        with open(file_path, 'w', encoding='utf-8') as f:
+            pass
 
 brainrot = ["relatable", "💀", "fypage", "fypviral", "goodvibes", "squidgame2", "squidgame", "netflix", "funny", "fypシ゚viral", 
 "roblox", "troll face", "among us", "memes", "prank", "pranks", "tiktok", "tik tok", "tiktoks", "tik toks", "tiktokers", "tik tokers", "tiktokers", "tik tokers",
@@ -92,7 +110,8 @@ if __name__ == "__main__":
     interests = pyautogui.prompt('Enter your interests (separated by commas):')
     initial_interests = [x.strip() for x in interests.split(',')]
     interest_list = []
-
+    
+    print("writing interests... ")
     for interest in initial_interests:
         # Run prompt twice for each interest
         for _ in range(2):
@@ -112,7 +131,7 @@ if __name__ == "__main__":
                 - Punctuation or special characters
                 - Generic or unrelated terms
                 - Any explanatory text
-                - numberd lists or bullet points"""
+                - numbered lists or bullet points"""
             response = chat(model='llama3.2', messages=[{'role': 'user', 'content': prompt}])
             search_queries = response['message']['content'].split('\n')
             interest_list.extend([query.strip() for query in search_queries if query.strip()])
@@ -120,15 +139,14 @@ if __name__ == "__main__":
 
     # Remove duplicates while preserving order
     interest_list = list(dict.fromkeys(interest_list))
-    
-    # Add hashtag versions and remove duplicates again
-    hashtag_versions = ['#' + query if not query.startswith('#') else query for query in interest_list.copy()]
-    interest_list.extend(hashtag_versions) 
-    interest_list = list(dict.fromkeys(interest_list))
-
-    # Remove duplicates while preserving order
-    interest_list = list(dict.fromkeys(interest_list))
     print(f"Expanded interests: {interest_list}")
+
+    print("click on the chrome tab")
+    print("auto-scroll will start in")
+    for i in range(5, 0, -1):
+        print(i)
+        time.sleep(1)
+
 
     print("Auto-scroll started. Press Ctrl+C to stop.")
 
@@ -144,7 +162,7 @@ if __name__ == "__main__":
                 interest_titles_path = 'interest-titles.txt'
                 interest_titles_list = read_words_from_file(interest_titles_path)
 
-                prompt = f"""our task is to analyze the provided list of topics from a YouTube Shorts tuning bot. 
+                prompt = f"""Your task is to analyze the provided list of topics from a YouTube Shorts tuning bot. 
                 The algorithm is being tuned for the following interests: {initial_interests}
                 Your job is to identify topics that are too specific or do not align well with these broad interests.
                 Ignore generic words such as 'a,' 'the,' 'shorts,' 'video,' 'for,' 'to,' 'on,' and similar filler words. 
@@ -190,8 +208,14 @@ if __name__ == "__main__":
                             if similar(interest, word):
                                 print(f"Interest found: {interest}")
                                 print(f"Matching word: {word}")
-                                sleep_time += 5
+                                sleep_time += 10
                                 break
+
+                    for interest in initial_interests:
+                        if interest.lower() in title(soup).lower():
+                            print(f"Initial interest found in title: {interest}")
+                            sleep_time += 10
+                            break
                             
                 # write to files
                 with open('titles.txt', 'a', encoding='utf-8') as f:
@@ -205,6 +229,8 @@ if __name__ == "__main__":
                      f.write(title(soup) + str(sleep_time) + '\n')
                     with open('interest-descriptions.txt', 'a', encoding='utf-8') as f:
                      f.write(description(soup) + str(sleep_time) +'\n')
+
+
 
 
                 if any(word.lower() in (title(soup).lower() + ' ' + description(soup).lower()) for word in brainrot):
