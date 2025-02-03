@@ -8,6 +8,19 @@ import win32clipboard
 from difflib import SequenceMatcher
 from ollama import chat
 
+brainrot = ["relatable", "💀", "fypage", "fypviral", "trending", "goodvibes", "squidgame2", "squidgame", "netflix", "funny", "fypシ゚viral", 
+"roblox", "troll face", "among us", "memes", "prank", "pranks", "tiktok", "tik tok", "tiktoks", "tik toks", "tiktokers", "tik tokers", "tiktokers", "tik tokers",
+"Sigma", "viral" , "fypシ", "fyp", "satisfying", "trendingshorts", "copyright", "Bro", "🤫", "☠️", "motivation", "leadership", "Moments Before Disaster", "clip", 
+"🗿", "respect", "skibidi", "aura", "capcut"]
+
+def like():
+    pyautogui.moveTo(789, 625)
+    pyautogui.click()
+
+def dislike():
+    pyautogui.moveTo(784, 730)
+    pyautogui.click()
+
 def get_chrome_url():
     window = GetForegroundWindow()
     title = GetWindowText(window)
@@ -75,7 +88,9 @@ if __name__ == "__main__":
         response = chat(model='llama3.2', messages=[{'role': 'user', 'content': prompt}])
         search_queries = response['message']['content'].split('\n')
         interest_list.extend([query.strip() for query in search_queries if query.strip()])
-        interest_list.append(interest)  # Add the original interest term
+        interest_list.append(interest)
+        hashtag_versions = ['#' + query for query in interest_list.copy()]
+        interest_list.extend(hashtag_versions)
 
     # Remove duplicates while preserving order
     interest_list = list(dict.fromkeys(interest_list))
@@ -129,7 +144,19 @@ if __name__ == "__main__":
                     with open('interest-descriptions.txt', 'a', encoding='utf-8') as f:
                      f.write(description(soup) + '\n')
 
-                #sleep
+
+                if any(word.lower() in (title(soup).lower() + ' ' + description(soup).lower()) for word in brainrot):
+                    print("Brainrot content detected")
+                    with open('brainrot.txt', 'a', encoding='utf-8') as f:
+                        f.write(title(soup) + '\n')
+                    dislike()
+                    print("disliked")
+                    sleep_time = 0
+
+                if sleep_time > 5:
+                    like()
+                    print("Liked")
+                print(f"Watching for {sleep_time} seconds")
                 time.sleep(sleep_time)
 
 
